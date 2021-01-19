@@ -30,25 +30,6 @@ toString c =
             "transparents"
 
 
-fromString : String -> Color
-fromString c =
-    case c of
-        "red" ->
-            Red
-
-        "blue" ->
-            Blue
-
-        "yellow" ->
-            Yellow
-
-        "orange" ->
-            Orange
-
-        _ ->
-            Transparent
-
-
 randomColor : Seed -> ( Color, Seed )
 randomColor seed =
     Random.step
