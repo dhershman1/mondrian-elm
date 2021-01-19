@@ -2,3 +2,6 @@
 elm-stuff
 # elm-repl generated files
 repl-temp-*
+# local scripts
+*.sh
+elm.js
