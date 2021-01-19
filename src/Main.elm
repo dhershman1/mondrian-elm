@@ -1,8 +1,8 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, div, text)
-import Html.Attributes exposing (class)
+import Html exposing (Html, div, main_, section, span, text)
+import Html.Attributes exposing (class, style, width)
 import Random
 import Task
 import Time exposing (Posix)
@@ -11,6 +11,7 @@ import Time exposing (Posix)
 type alias Model =
     { seed : Random.Seed
     , intialInt : Int
+    , blocks : Int
     }
 
 
@@ -18,9 +19,9 @@ type Msg
     = InitRandom Posix
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( Model (Random.initialSeed 0) 0
+init : Int -> ( Model, Cmd Msg )
+init blockCount =
+    ( Model (Random.initialSeed 0) 0 blockCount
     , Cmd.batch
         [ Task.perform InitRandom Time.now
         ]
@@ -63,40 +64,58 @@ randomHeightAndWidth seed =
     ( ( height * 10, width * 10 ), finalSeed )
 
 
-randomPosition : Int -> Int -> Random.Seed -> ( Int, Int )
+randomPosition : Int -> Int -> Random.Seed -> ( ( Int, Int ), Random.Seed )
 randomPosition w h seed =
     let
         ( right, nextSeed ) =
             Random.step (Random.int 1 10) seed
 
-        ( bottom, _ ) =
+        ( bottom, finalSeed ) =
             Random.step (Random.int 1 10) nextSeed
 
         pos =
             ( clamp 0 (100 - w) (right * 10), clamp 0 (100 - h) (bottom * 10) )
     in
-    pos
+    ( pos, finalSeed )
+
+
+createDivs : Int -> List (Html Msg) -> Random.Seed -> List (Html Msg)
+createDivs count divs seed =
+    if count > 0 then
+        let
+            newCount =
+                count - 1
+
+            ( ( width, height ), nextSeed ) =
+                randomHeightAndWidth seed
+
+            ( ( right, bottom ), finalSeed ) =
+                randomPosition width height nextSeed
+
+            d =
+                div
+                    [ style "width" (String.fromInt width ++ "%")
+                    , style "height" (String.fromInt height ++ "%")
+                    , style "right" (String.fromInt right ++ "%")
+                    , style "bottom" (String.fromInt bottom ++ "%")
+                    ]
+                    []
+        in
+        createDivs newCount (d :: divs) finalSeed
+
+    else
+        divs
 
 
 view : Model -> Html Msg
 view model =
-    let
-        ( ( width, height ), nextSeed ) =
-            randomHeightAndWidth model.seed
-
-        ( right, bottom ) =
-            randomPosition width height nextSeed
-    in
-    div [ class "wrapper" ]
-        [ div [] [ text ("Time Int: " ++ String.fromInt model.intialInt) ]
-        , div [] [ text ("Height: " ++ String.fromInt height) ]
-        , div [] [ text ("Width: " ++ String.fromInt width) ]
-        , div [] [ text ("Right: " ++ String.fromInt right) ]
-        , div [] [ text ("Bottom: " ++ String.fromInt bottom) ]
+    main_ [ class "wrapper" ]
+        [ span [ class "seed" ] [ text ("Current Seed: " ++ String.fromInt model.intialInt) ]
+        , section [ class "blocks" ] (createDivs model.blocks [] model.seed)
         ]
 
 
-main : Program () Model Msg
+main : Program Int Model Msg
 main =
     Browser.element
         { init = init
