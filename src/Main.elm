@@ -79,6 +79,25 @@ randomPosition w h seed =
     ( pos, finalSeed )
 
 
+
+-- ['#e02f09', 0.25],
+--     ['#f5f926', 0.25],
+--     ['#fcb00c', 0.25],
+--     ['#1309e0', 0.25]
+
+
+randomColor : Random.Seed -> ( String, Random.Seed )
+randomColor seed =
+    Random.step
+        (Random.weighted ( 25, "#e02f09" )
+            [ ( 25, "#f5f926" )
+            , ( 25, "#fcb00c" )
+            , ( 25, "#1309e0" )
+            ]
+        )
+        seed
+
+
 createDivs : Int -> List (Html Msg) -> Random.Seed -> List (Html Msg)
 createDivs count divs seed =
     if count > 0 then
@@ -89,8 +108,15 @@ createDivs count divs seed =
             ( ( width, height ), nextSeed ) =
                 randomHeightAndWidth seed
 
+            ( color, colorSeed ) =
+                if width < 50 && height < 50 then
+                    randomColor nextSeed
+
+                else
+                    ( "transparent", nextSeed )
+
             ( ( right, bottom ), finalSeed ) =
-                randomPosition width height nextSeed
+                randomPosition width height colorSeed
 
             d =
                 div
@@ -98,6 +124,7 @@ createDivs count divs seed =
                     , style "height" (String.fromInt height ++ "%")
                     , style "right" (String.fromInt right ++ "%")
                     , style "bottom" (String.fromInt bottom ++ "%")
+                    , style "background-color" color
                     ]
                     []
         in
