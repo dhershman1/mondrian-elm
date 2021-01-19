@@ -92,8 +92,8 @@ randomPosition w h seed =
     ( pos, finalSeed )
 
 
-createRect : Int -> List (Html Msg) -> Seed -> List (Html Msg)
-createRect count divs seed =
+createRects : Int -> List (Html Msg) -> Seed -> List (Html Msg)
+createRects count divs seed =
     if count > 0 then
         let
             newCount =
@@ -122,7 +122,7 @@ createRect count divs seed =
                     ]
                     []
         in
-        createRect newCount (d :: divs) finalSeed
+        createRects newCount (d :: divs) finalSeed
 
     else
         divs
@@ -132,7 +132,7 @@ view : Model -> Html Msg
 view model =
     main_ [ class "wrapper" ]
         [ span [ class "seed" ] [ text ("Current Seed: " ++ String.fromInt model.intialInt) ]
-        , section [ class "blocks" ] (createRect model.blocks [] model.seed)
+        , section [ class "blocks" ] (createRects model.blocks [] model.seed)
         ]
 
 
