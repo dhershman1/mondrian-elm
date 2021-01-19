@@ -79,13 +79,6 @@ randomPosition w h seed =
     ( pos, finalSeed )
 
 
-
--- ['#e02f09', 0.25],
---     ['#f5f926', 0.25],
---     ['#fcb00c', 0.25],
---     ['#1309e0', 0.25]
-
-
 randomColor : Random.Seed -> ( String, Random.Seed )
 randomColor seed =
     Random.step
