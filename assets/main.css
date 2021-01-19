@@ -9,3 +9,19 @@ div {
   position: absolute;
   border: 3px solid #000;
 }
+
+.red {
+  background-color: rgb(224, 47, 9);
+}
+
+.yellow {
+  background-color: rgb(245, 249, 38);
+}
+
+.blue {
+  background-color: rgb(19, 9, 224);
+}
+
+.orange {
+  background-color: rgb(252, 176, 12);
+}

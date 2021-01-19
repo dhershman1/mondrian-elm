@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Browser
+import Color
 import Html exposing (Html, div, main_, section, span, text)
 import Html.Attributes exposing (class, style, width)
 import Random
@@ -12,6 +13,18 @@ type alias Model =
     { seed : Random.Seed
     , intialInt : Int
     , blocks : Int
+    }
+
+
+type alias Size =
+    { width : Int
+    , height : Int
+    }
+
+
+type alias Position =
+    { right : Int
+    , bottom : Int
     }
 
 
@@ -52,7 +65,7 @@ subscriptions _ =
     Sub.none
 
 
-randomHeightAndWidth : Random.Seed -> ( ( Int, Int ), Random.Seed )
+randomHeightAndWidth : Random.Seed -> ( Size, Random.Seed )
 randomHeightAndWidth seed =
     let
         ( height, nextSeed ) =
@@ -61,10 +74,10 @@ randomHeightAndWidth seed =
         ( width, finalSeed ) =
             Random.step (Random.int 1 10) nextSeed
     in
-    ( ( height * 10, width * 10 ), finalSeed )
+    ( { height = height * 10, width = width * 10 }, finalSeed )
 
 
-randomPosition : Int -> Int -> Random.Seed -> ( ( Int, Int ), Random.Seed )
+randomPosition : Int -> Int -> Random.Seed -> ( Position, Random.Seed )
 randomPosition w h seed =
     let
         ( right, nextSeed ) =
@@ -74,41 +87,29 @@ randomPosition w h seed =
             Random.step (Random.int 1 10) nextSeed
 
         pos =
-            ( clamp 0 (100 - w) (right * 10), clamp 0 (100 - h) (bottom * 10) )
+            { right = clamp 0 (100 - w) (right * 10), bottom = clamp 0 (100 - h) (bottom * 10) }
     in
     ( pos, finalSeed )
 
 
-randomColor : Random.Seed -> ( String, Random.Seed )
-randomColor seed =
-    Random.step
-        (Random.weighted ( 25, "#e02f09" )
-            [ ( 25, "#f5f926" )
-            , ( 25, "#fcb00c" )
-            , ( 25, "#1309e0" )
-            ]
-        )
-        seed
-
-
-createDivs : Int -> List (Html Msg) -> Random.Seed -> List (Html Msg)
-createDivs count divs seed =
+createRect : Int -> List (Html Msg) -> Random.Seed -> List (Html Msg)
+createRect count divs seed =
     if count > 0 then
         let
             newCount =
                 count - 1
 
-            ( ( width, height ), nextSeed ) =
+            ( { width, height }, nextSeed ) =
                 randomHeightAndWidth seed
 
             ( color, colorSeed ) =
                 if width < 50 && height < 50 then
-                    randomColor nextSeed
+                    Color.randomColor nextSeed
 
                 else
-                    ( "transparent", nextSeed )
+                    ( Color.Transparent, nextSeed )
 
-            ( ( right, bottom ), finalSeed ) =
+            ( { right, bottom }, finalSeed ) =
                 randomPosition width height colorSeed
 
             d =
@@ -117,11 +118,11 @@ createDivs count divs seed =
                     , style "height" (String.fromInt height ++ "%")
                     , style "right" (String.fromInt right ++ "%")
                     , style "bottom" (String.fromInt bottom ++ "%")
-                    , style "background-color" color
+                    , class (Color.toString color)
                     ]
                     []
         in
-        createDivs newCount (d :: divs) finalSeed
+        createRect newCount (d :: divs) finalSeed
 
     else
         divs
@@ -131,7 +132,7 @@ view : Model -> Html Msg
 view model =
     main_ [ class "wrapper" ]
         [ span [ class "seed" ] [ text ("Current Seed: " ++ String.fromInt model.intialInt) ]
-        , section [ class "blocks" ] (createDivs model.blocks [] model.seed)
+        , section [ class "blocks" ] (createRect model.blocks [] model.seed)
         ]
 
 
