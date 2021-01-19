@@ -4,13 +4,13 @@ import Browser
 import Color
 import Html exposing (Html, div, main_, section, span, text)
 import Html.Attributes exposing (class, style, width)
-import Random
+import Random exposing (Seed)
 import Task
 import Time exposing (Posix)
 
 
 type alias Model =
-    { seed : Random.Seed
+    { seed : Seed
     , intialInt : Int
     , blocks : Int
     }
@@ -65,7 +65,7 @@ subscriptions _ =
     Sub.none
 
 
-randomHeightAndWidth : Random.Seed -> ( Size, Random.Seed )
+randomHeightAndWidth : Seed -> ( Size, Seed )
 randomHeightAndWidth seed =
     let
         ( height, nextSeed ) =
@@ -77,7 +77,7 @@ randomHeightAndWidth seed =
     ( { height = height * 10, width = width * 10 }, finalSeed )
 
 
-randomPosition : Int -> Int -> Random.Seed -> ( Position, Random.Seed )
+randomPosition : Int -> Int -> Seed -> ( Position, Seed )
 randomPosition w h seed =
     let
         ( right, nextSeed ) =
@@ -92,7 +92,7 @@ randomPosition w h seed =
     ( pos, finalSeed )
 
 
-createRect : Int -> List (Html Msg) -> Random.Seed -> List (Html Msg)
+createRect : Int -> List (Html Msg) -> Seed -> List (Html Msg)
 createRect count divs seed =
     if count > 0 then
         let
